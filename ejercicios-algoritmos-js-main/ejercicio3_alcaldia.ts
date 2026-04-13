@@ -1,60 +1,85 @@
-// Constantes
-const SALARIO_MINIMO: number = 1300000;
-const SUBSIDIO_12: number = SALARIO_MINIMO * 0.12;
-const SUBSIDIO_15: number = SALARIO_MINIMO * 0.15;
+/**
+ * PROGRAMA DE SUBSIDIOS - ALCALDÍA DE ARMENIA 2026
+ * Este script calcula los subsidios para adultos mayores basados en su edad
+ * y genera un reporte detallado del presupuesto necesario.
+ */
 
-// Datos
+// --- CONFIGURACIÓN DE CONSTANTES (Valores fijos del negocio) ---
+const SALARIO_MINIMO: number = 1300000;
+
+// Porcentajes de subsidio según ley municipal
+const PORC_SUBSIDIO_BASE: number = 0.12; // 12% para 60-80 años
+const PORC_SUBSIDIO_SENIOR: number = 0.15; // 15% para mayores de 80
+
+const SUBSIDIO_12: number = SALARIO_MINIMO * PORC_SUBSIDIO_BASE;
+const SUBSIDIO_15: number = SALARIO_MINIMO * PORC_SUBSIDIO_SENIOR;
+
+// --- FUENTE DE DATOS ---
 const nombres: string[] = ["Carlos Pérez", "María López", "Juan Torres", "Rosa Gómez", "Luis Herrera"];
 const edades: number[] = [65, 82, 45, 78, 91];
 
-// Contadores
-let totalRegistrados: number = 0;
+// --- ACUMULADORES Y ESTADÍSTICAS ---
 let beneficiarios60a80: number = 0;
 let beneficiarios80mas: number = 0;
 let noAplican: number = 0;
 let presupuestoTotal: number = 0;
 
+/**
+ * PROCESAMIENTO DE LA BASE DE DATOS
+ * Se analiza cada registro para determinar elegibilidad y montos.
+ */
 for (let i: number = 0; i < nombres.length; i++) {
-
-    let nombre: string = nombres[i];
-    let edad: number = edades[i];
-    let porcentaje: number = 0;
-    let subsidio: number = 0;
+    const nombre: string = nombres[i];
+    const edad: number = edades[i];
+    
+    let subsidioAplicado: number = 0;
+    let porcentajeTexto: number = 0;
     let categoria: string = "";
+    let esElegible: boolean = false;
 
+    // Lógica de Segmentación por Edad
     if (edad >= 60 && edad <= 80) {
-        porcentaje = 12;
-        subsidio = SUBSIDIO_12;
+        // Rango: Adulto Mayor Estándar
+        subsidioAplicado = SUBSIDIO_12;
+        porcentajeTexto = PORC_SUBSIDIO_BASE * 100;
+        categoria = "Adulto Mayor";
         beneficiarios60a80++;
-        presupuestoTotal += subsidio;
-    } else if (edad > 80) {
-        porcentaje = 15;
-        subsidio = SUBSIDIO_15;
+        esElegible = true;
+    } 
+    else if (edad > 80) {
+        // Rango: Adulto Mayor Senior
+        subsidioAplicado = SUBSIDIO_15;
+        porcentajeTexto = PORC_SUBSIDIO_SENIOR * 100;
+        categoria = "Adulto Mayor Senior";
         beneficiarios80mas++;
-        presupuestoTotal += subsidio;
-    } else {
+        esElegible = true;
+    } 
+    else {
+        // Caso: Menor de 60 años
         noAplican++;
     }
 
-    if (edad >= 80) {
-        categoria = "Adulto Mayor Senior";
-    } else {
-        categoria = "Adulto Mayor";
-    }
+    // Si la persona es apta para el subsidio, se procesa la salida y el gasto
+    if (esElegible) {
+        presupuestoTotal += subsidioAplicado;
 
-    if (edad >= 60) {
-        console.log("\n--- PERSONA " + (i + 1) + ": " + nombre + " ---");
-        console.log("Edad: " + edad + " anos");
-        console.log("Categoria: " + categoria);
-        console.log("Subsidio (" + porcentaje + "%): $" + subsidio.toLocaleString("es-CO"));
+        console.log(`\n--- PERSONA ${i + 1}: ${nombre.toUpperCase()} ---`);
+        console.log(`Edad:      ${edad} años`);
+        console.log(`Categoría: ${categoria}`);
+        console.log(`Subsidio:  $${subsidioAplicado.toLocaleString("es-CO")} (${porcentajeTexto}%)`);
     }
-
-    totalRegistrados++;
 }
 
-console.log("\n=== INFORME ALCALDIA DE ARMENIA ===");
-console.log("Total registrados: " + totalRegistrados);
-console.log("Beneficiarios (60-80 anos): " + beneficiarios60a80 + " - Subsidio: $" + SUBSIDIO_12.toLocaleString("es-CO") + " c/u");
-console.log("Beneficiarios (>80 anos): " + beneficiarios80mas + " - Subsidio: $" + SUBSIDIO_15.toLocaleString("es-CO") + " c/u");
-console.log("No aplican: " + noAplican);
-console.log("PRESUPUESTO TOTAL: $" + presupuestoTotal.toLocaleString("es-CO"));
+/**
+ * GENERACIÓN DEL INFORME CONSOLIDADO
+ */
+console.log("\n" + "=".repeat(45));
+console.log("       INFORME ALCALDÍA DE ARMENIA");
+console.log("=".repeat(45));
+console.log(`Total ciudadanos registrados:  ${nombres.length}`);
+console.log(`Beneficiarios 60-80 años:      ${beneficiarios60a80}`);
+console.log(`Beneficiarios > 80 años:       ${beneficiarios80mas}`);
+console.log(`Ciudadanos no elegibles:       ${noAplican}`);
+console.log("-".repeat(45));
+console.log(`PRESUPUESTO TOTAL REQUERIDO:   $${presupuestoTotal.toLocaleString("es-CO")}`);
+console.log("=".repeat(45));
